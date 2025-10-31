@@ -254,22 +254,46 @@ Both coordinator and workers are running compatible citus versions (so the conne
 
 
 #### Register Workers (manually, to confirm)
-Run this from your coordinator pod:
-```
-kubectl exec -n morph $COORDINATOR_POD -- psql -U morph -d morphdb <<'EOF'
-SELECT citus_add_node('citus-worker-0.citus-worker.morph.svc.cluster.local', 5432);
-SELECT citus_add_node('citus-worker-1.citus-worker.morph.svc.cluster.local', 5432);
-SELECT citus_add_node('citus-worker-2.citus-worker.morph.svc.cluster.local', 5432);
 
--- Verify registration
-SELECT * FROM citus_get_active_worker_nodes();
-EOF
-You should now see something like:
-                   node_name                                    | node_port | nodeid
----------------------------------------------------------------+------------+--------
- citus-worker-0.citus-worker.morph.svc.cluster.local            |       5432 |      1
- citus-worker-1.citus-worker.morph.svc.cluster.local            |       5432 |      2
- citus-worker-2.citus-worker.morph.svc.cluster.local            |       5432 |      3
+✅ Step 1: Set the Coordinator Host
+
+Run this (inside your coordinator pod):
+```
+kubectl exec -n morph $COORDINATOR_POD -- \
+  psql -U morph -d morphdb -c "SELECT citus_set_coordinator_host('citus-coordinator.morph.svc.cluster.local');"
+Expected output:
+ citus_set_coordinator_host 
+----------------------------
+ 
+(1 row)
+```
+✅ Step 2: Add Workers Again
+
+Now re-run the add commands:
+```
+kubectl exec -n morph $COORDINATOR_POD -- \
+  psql -U morph -d morphdb -c "SELECT citus_add_node('citus-worker-0.citus-worker.morph.svc.cluster.local', 5432);"
+
+kubectl exec -n morph $COORDINATOR_POD -- \
+  psql -U morph -d morphdb -c "SELECT citus_add_node('citus-worker-1.citus-worker.morph.svc.cluster.local', 5432);"
+
+kubectl exec -n morph $COORDINATOR_POD -- \
+  psql -U morph -d morphdb -c "SELECT citus_add_node('citus-worker-2.citus-worker.morph.svc.cluster.local', 5432);"
+```
+
+✅ Step 3: Verify Cluster Setup
+
+Finally, check that the nodes are registered:
+```
+kubectl exec -n morph $COORDINATOR_POD -- \
+  psql -U morph -d morphdb -c "SELECT * FROM citus_get_active_worker_nodes();"
+
+You should now see output like:
+                 node_name                                  | node_port | nodeid
+------------------------------------------------------------+-----------+--------
+ citus-worker-0.citus-worker.morph.svc.cluster.local        |      5432 |      1
+ citus-worker-1.citus-worker.morph.svc.cluster.local        |      5432 |      2
+ citus-worker-2.citus-worker.morph.svc.cluster.local        |      5432 |      3
 ```
 
 
@@ -283,5 +307,8 @@ Enable extensions on workers first, then coordinator.
 Rebalance shards before any schema or table deletion.
 
 Use the provided reset_citus.sh script for automation.
+
+If you run the schema before the workers are registered, Citus defaults to creating all shards on the coordinator. 
+When workers are visible, you have to rebalance existing tables
 
 
