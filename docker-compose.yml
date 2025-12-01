@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  coordinator:
+    image: citusdata/citus:12.1
+    container_name: partition_db1
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: partitionuser
+      POSTGRES_PASSWORD: partitionpass
+      POSTGRES_DB: tpch_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres1_data:/var/lib/postgresql/data
+    networks:
+      - default
+    command: >
+      postgres
+      -c shared_preload_libraries=citus
+      -c max_connections=200
+      -c shared_buffers=256MB
+
+  worker1:
+    image: citusdata/citus:12.1
+    container_name: partition_db2
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: partitionuser
+      POSTGRES_PASSWORD: partitionpass
+      POSTGRES_DB: tpch_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres2_data:/var/lib/postgresql/data
+    networks:
+      - default
+    command: >
+      postgres
+      -c shared_preload_libraries=citus
+      -c max_connections=200
+      -c shared_buffers=256MB
+
+  worker2:
+    image: citusdata/citus:12.1
+    container_name: partition_db3
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: partitionuser
+      POSTGRES_PASSWORD: partitionpass
+      POSTGRES_DB: tpch_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres3_data:/var/lib/postgresql/data
+    networks:
+      - default
+    command: >
+      postgres
+      -c shared_preload_libraries=citus
+      -c max_connections=200
+      -c shared_buffers=256MB
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - default
+
+volumes:
+  postgres1_data:
+  postgres2_data:
+  postgres3_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    driver: bridge
