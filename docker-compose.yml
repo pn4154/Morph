@@ -1,0 +1,186 @@
+version: '3.8'
+
+# Morph: Docker Compose for Local Development
+# =============================================
+# Use this for local development without Kubernetes
+
+services:
+  # Citus Coordinator
+  coordinator:
+    image: citusdata/citus:12.1
+    container_name: morph-coordinator
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: morph
+      POSTGRES_PASSWORD: MorphSecurePass123!
+      POSTGRES_DB: morphdb
+    volumes:
+      - coordinator_data:/var/lib/postgresql/data
+      - ./scripts/init_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U morph -d morphdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - morph-network
+
+  # Citus Worker 1
+  worker1:
+    image: citusdata/citus:12.1
+    container_name: morph-worker-1
+    environment:
+      POSTGRES_USER: morph
+      POSTGRES_PASSWORD: MorphSecurePass123!
+      POSTGRES_DB: morphdb
+    volumes:
+      - worker1_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U morph -d morphdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - morph-network
+
+  # Citus Worker 2
+  worker2:
+    image: citusdata/citus:12.1
+    container_name: morph-worker-2
+    environment:
+      POSTGRES_USER: morph
+      POSTGRES_PASSWORD: MorphSecurePass123!
+      POSTGRES_DB: morphdb
+    volumes:
+      - worker2_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U morph -d morphdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - morph-network
+
+  # Citus Worker 3
+  worker3:
+    image: citusdata/citus:12.1
+    container_name: morph-worker-3
+    environment:
+      POSTGRES_USER: morph
+      POSTGRES_PASSWORD: MorphSecurePass123!
+      POSTGRES_DB: morphdb
+    volumes:
+      - worker3_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U morph -d morphdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - morph-network
+
+  # Cluster Manager - Initializes Citus cluster
+  manager:
+    image: citusdata/citus:12.1
+    container_name: morph-manager
+    depends_on:
+      coordinator:
+        condition: service_healthy
+      worker1:
+        condition: service_healthy
+      worker2:
+        condition: service_healthy
+      worker3:
+        condition: service_healthy
+    environment:
+      PGHOST: coordinator
+      PGUSER: morph
+      PGPASSWORD: MorphSecurePass123!
+      PGDATABASE: morphdb
+    command: |
+      bash -c "
+        echo 'Waiting for all nodes to be ready...'
+        sleep 10
+        
+        echo 'Setting up Citus extensions on workers...'
+        for host in worker1 worker2 worker3; do
+          psql -h $$host -c 'CREATE EXTENSION IF NOT EXISTS citus;'
+          psql -h $$host -c 'CREATE EXTENSION IF NOT EXISTS pg_stat_statements;'
+        done
+        
+        echo 'Setting up Citus extensions on coordinator...'
+        psql -h coordinator -c 'CREATE EXTENSION IF NOT EXISTS citus;'
+        psql -h coordinator -c 'CREATE EXTENSION IF NOT EXISTS pg_stat_statements;'
+        
+        echo 'Setting coordinator host...'
+        psql -h coordinator -c \"SELECT citus_set_coordinator_host('coordinator');\"
+        
+        echo 'Adding workers to cluster...'
+        psql -h coordinator -c \"SELECT citus_add_node('worker1', 5432);\" || true
+        psql -h coordinator -c \"SELECT citus_add_node('worker2', 5432);\" || true
+        psql -h coordinator -c \"SELECT citus_add_node('worker3', 5432);\" || true
+        
+        echo 'Verifying cluster setup...'
+        psql -h coordinator -c 'SELECT * FROM citus_get_active_worker_nodes();'
+        
+        echo 'Cluster setup complete!'
+      "
+    networks:
+      - morph-network
+
+  # Prometheus for monitoring
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: morph-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - morph-network
+
+  # PostgreSQL Exporter for Prometheus
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.14.0
+    container_name: morph-postgres-exporter
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://morph:MorphSecurePass123!@coordinator:5432/morphdb?sslmode=disable"
+    depends_on:
+      coordinator:
+        condition: service_healthy
+    networks:
+      - morph-network
+
+  # Grafana for visualization (optional)
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: morph-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - morph-network
+
+volumes:
+  coordinator_data:
+  worker1_data:
+  worker2_data:
+  worker3_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  morph-network:
+    driver: bridge
