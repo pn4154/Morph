@@ -20,6 +20,10 @@ from workloads import (
 )
 import db_utils
 import init_db
+from workloads.BimodalRange import BimodalRangeWorkload
+from workloads.GaussianRange import GaussianRangeWorkload
+from workloads.SlidingGaussianRange import SlidingGaussianRangeWorkload
+from workloads.UniformRange import UniformRangeWorkload
 
 # Constants
 LATENCY_SMOOTHING_WINDOW = 50  # Smooth latencies over this many queries
@@ -280,6 +284,10 @@ def run_evaluation(model_path):
         "SlidingGaussian": SlidingGaussianWorkload,
         "Bimodal": BimodalWorkload,
         "Uniform": UniformWorkload,
+        "GaussianRange": GaussianRangeWorkload,
+        "SlidingGaussianRange": SlidingGaussianRangeWorkload,
+        "BimodalRange": BimodalRangeWorkload,
+        "UniformRange": UniformRangeWorkload,
     }
 
     # Store results for graphing

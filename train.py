@@ -74,21 +74,17 @@ def train(params: TrainParameters):
     # Create training environment (will randomly select workloads)
     print("\n=== Creating Environment ===")
     print("Environment will randomly select workloads per episode:")
-    print("  - GaussianWorkload")
-    print("  - SlidingGaussianWorkload")
-    print("  - BimodalWorkload")
-    print("  - UniformWorkload")
-    print(f"Environment config: num_orders={params.num_orders}, queries_per_step={params.queries_per_step}")
+    print(
+        f"Environment config: num_orders={params.num_orders}, queries_per_step={params.queries_per_step}"
+    )
     env = PartitionEnv(
-        num_orders=params.num_orders,
-        queries_per_step=params.queries_per_step
+        num_orders=params.num_orders, queries_per_step=params.queries_per_step
     )
     print("✓ Training environment created")
 
     # Create evaluation environment (also uses random workloads)
     eval_env = PartitionEnv(
-        num_orders=params.num_orders,
-        queries_per_step=params.queries_per_step
+        num_orders=params.num_orders, queries_per_step=params.queries_per_step
     )
     print("✓ Evaluation environment created")
 
@@ -174,4 +170,8 @@ if __name__ == "__main__":
     )
 
     # Run training
+    train(params)
+    train(params)
+    train(params)
+    train(params)
     train(params)

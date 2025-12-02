@@ -3,7 +3,16 @@ import numpy as np
 from gymnasium import spaces
 import random
 import db_utils
-from workloads import GaussianWorkload, SlidingGaussianWorkload, BimodalWorkload, UniformWorkload
+from workloads import (
+    GaussianWorkload,
+    SlidingGaussianWorkload,
+    BimodalWorkload,
+    UniformWorkload,
+    GaussianRangeWorkload,
+    SlidingGaussianRangeWorkload,
+    BimodalRangeWorkload,
+    UniformRangeWorkload,
+)
 
 
 class PartitionEnv(gym.Env):
@@ -175,16 +184,20 @@ class PartitionEnv(gym.Env):
         return reward
 
     def selectRandomWorkload(self):
-        """Randomly selects one of the four workload types with random parameters.
+        """Randomly selects one of the eight workload types with random parameters.
 
         Returns:
-            Workload object (Gaussian, SlidingGaussian, Bimodal, or Uniform)
+            Workload object (Gaussian, SlidingGaussian, Bimodal, Uniform, or their Range variants)
         """
         workload_classes = [
             GaussianWorkload,
             SlidingGaussianWorkload,
             BimodalWorkload,
             UniformWorkload,
+            GaussianRangeWorkload,
+            SlidingGaussianRangeWorkload,
+            BimodalRangeWorkload,
+            UniformRangeWorkload,
         ]
 
         # Randomly select workload class
@@ -204,9 +217,19 @@ class PartitionEnv(gym.Env):
             # Get query from workload (returns SQL string with OrderID embedded)
             query = self.workload.sample(self.max_id)
 
-            # Extract OrderID from query for tracking
-            # Query format: "SELECT * FROM Orders WHERE OrderID = X"
-            order_id = int(query.split("=")[1].strip())
+            # Extract OrderID(s) from query for tracking
+            if "BETWEEN" in query:
+                # Range query format: "SELECT * FROM Orders WHERE OrderID BETWEEN X AND Y"
+                # Extract lower and upper bounds
+                between_part = query.split("BETWEEN")[1].split("AND")
+                lower_bound = int(between_part[0].strip())
+                upper_bound = int(between_part[1].strip())
+                # Use midpoint for tracking
+                order_id = (lower_bound + upper_bound) // 2
+            else:
+                # Point query format: "SELECT * FROM Orders WHERE OrderID = X"
+                order_id = int(query.split("=")[1].strip())
+
             self.accessed_order_ids.append(order_id)
 
             # Execute query (query already has OrderID, so no params needed)

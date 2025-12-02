@@ -7,6 +7,11 @@ from .Gaussian import GaussianWorkload
 from .SlidingGaussian import SlidingGaussianWorkload
 from .Bimodal import BimodalWorkload
 from .Uniform import UniformWorkload
+from .WorkloadAbstractClassRange import WorkloadAbstractClassRange
+from .GaussianRange import GaussianRangeWorkload
+from .SlidingGaussianRange import SlidingGaussianRangeWorkload
+from .BimodalRange import BimodalRangeWorkload
+from .UniformRange import UniformRangeWorkload
 
 __all__ = [
     "WorkloadAbstractClass",
@@ -14,4 +19,9 @@ __all__ = [
     "SlidingGaussianWorkload",
     "BimodalWorkload",
     "UniformWorkload",
+    "WorkloadAbstractClassRange",
+    "GaussianRangeWorkload",
+    "SlidingGaussianRangeWorkload",
+    "BimodalRangeWorkload",
+    "UniformRangeWorkload",
 ]
