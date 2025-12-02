@@ -5,7 +5,7 @@ Utility functions for workload sampling.
 import random
 
 
-def select_random_range(value, max_id, max_range_size=0.01):
+def select_random_range(value, max_id, max_range_size=0.1):
     """Select a random range query based on a normalized value.
 
     Args:
@@ -45,6 +45,8 @@ def select_random_range(value, max_id, max_range_size=0.01):
         upper_bound = lower_bound + 1
 
     # Build SQL query
-    query = f"SELECT * FROM Orders WHERE OrderID BETWEEN {lower_bound} AND {upper_bound}"
+    query = (
+        f"SELECT * FROM Orders WHERE OrderID BETWEEN {lower_bound} AND {upper_bound}"
+    )
 
     return query

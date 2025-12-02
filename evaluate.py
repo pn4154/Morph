@@ -1,8 +1,3 @@
-"""
-Evaluation script for comparing PPO model against baselines.
-Compares adaptive partitioning (PPO) vs static partitions vs unpartitioned.
-"""
-
 import sys
 import os
 from datetime import datetime
@@ -25,16 +20,14 @@ from workloads.GaussianRange import GaussianRangeWorkload
 from workloads.SlidingGaussianRange import SlidingGaussianRangeWorkload
 from workloads.UniformRange import UniformRangeWorkload
 
-# Constants
 LATENCY_SMOOTHING_WINDOW = 50  # Smooth latencies over this many queries
 NUM_RUNS = 5  # Number of runs per workload type
-NUM_ITERATIONS = 20  # Number of iterations per run
-QUERIES_PER_ITERATION = 50  # Queries per iteration
+NUM_ITERATIONS = 5  # Number of iterations per run
+QUERIES_PER_ITERATION = 20  # Queries per iteration
 NUM_ORDERS = 10000  # Maximum OrderID in database
 
 
 def initialize_database():
-    """Reinitialize the database to clean state."""
     print("  Reinitializing database...")
     init_db.drop_and_create_database()
 
@@ -42,20 +35,10 @@ def initialize_database():
     init_db.create_tables(conn)
     init_db.populate_tables(conn)
     conn.close()
-    print("   Database reinitialized")
+    print("  Database reinitialized")
 
 
 def evaluate_ppo_model(model_path, workload, run_num):
-    """Evaluate PPO model with adaptive partitioning.
-
-    Args:
-        model_path: Path to saved PPO model
-        workload: Workload instance to use
-        run_num: Run number for logging
-
-    Returns:
-        tuple: (all_latencies, total_repartition_time)
-    """
     print(f"    Run {run_num + 1}: PPO Model")
 
     # Load model
