@@ -1,0 +1,82 @@
+{
+  "uniform": {
+    "static": {
+      "mean_reward": 140.3357269071337,
+      "std_reward": 0.909268830275166,
+      "mean_latency": 10.966427309286631,
+      "p95_latency": 13.003455172971266
+    },
+    "rl_skewed": {
+      "mean_reward": 139.87091954462716,
+      "std_reward": 0.8831531047517365,
+      "mean_latency": 11.012908045537284,
+      "p95_latency": 12.98718129940358
+    },
+    "rl_shifting": {
+      "mean_reward": 133.2668253159474,
+      "std_reward": 0.7771344656441866,
+      "mean_latency": 10.963317468405261,
+      "p95_latency": 13.023521888813836
+    }
+  },
+  "skewed": {
+    "static": {
+      "mean_reward": 84.28071428802305,
+      "std_reward": 1.6776372441639915,
+      "mean_latency": 15.518935871253621,
+      "p95_latency": 18.040699310917038
+    },
+    "rl_skewed": {
+      "mean_reward": 82.44164794235255,
+      "std_reward": 1.6670591994759265,
+      "mean_latency": 15.702842505820675,
+      "p95_latency": 18.698199396310144
+    },
+    "rl_shifting": {
+      "mean_reward": 75.69451474772033,
+      "std_reward": 1.4128965681472592,
+      "mean_latency": 15.611555825283897,
+      "p95_latency": 18.59135922752732
+    }
+  },
+  "shifting": {
+    "static": {
+      "mean_reward": 136.37172267189342,
+      "std_reward": 1.1078981505167826,
+      "mean_latency": 11.302054424465481,
+      "p95_latency": 13.605103492188205
+    },
+    "rl_skewed": {
+      "mean_reward": 137.1978277358852,
+      "std_reward": 0.7509615228994174,
+      "mean_latency": 11.219443918066307,
+      "p95_latency": 13.21315671278917
+    },
+    "rl_shifting": {
+      "mean_reward": 129.53681598076682,
+      "std_reward": 0.5353840345977412,
+      "mean_latency": 11.269545093578145,
+      "p95_latency": 13.198604861347667
+    }
+  },
+  "bimodal": {
+    "static": {
+      "mean_reward": 134.04128663419354,
+      "std_reward": 1.2966719608220294,
+      "mean_latency": 11.489317836481693,
+      "p95_latency": 13.519678300430717
+    },
+    "rl_skewed": {
+      "mean_reward": 134.23890509373643,
+      "std_reward": 1.0591563565416287,
+      "mean_latency": 11.469555990527398,
+      "p95_latency": 13.467202208822595
+    },
+    "rl_shifting": {
+      "mean_reward": 127.06625847141788,
+      "std_reward": 0.7103855367744522,
+      "mean_latency": 11.466820652759255,
+      "p95_latency": 13.603466584972242
+    }
+  }
+}

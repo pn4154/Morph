@@ -1,0 +1,42 @@
+{
+  "uniform": {
+    "rl_agent": {
+      "mean_latency": 11.01307866275776,
+      "std_latency": 0.09872441549162343
+    },
+    "static": {
+      "mean_latency": 11.042134716897248,
+      "std_latency": 0.10397722340913153
+    }
+  },
+  "skewed": {
+    "rl_agent": {
+      "mean_latency": 16.44170981595836,
+      "std_latency": 1.2333648960782009
+    },
+    "static": {
+      "mean_latency": 16.682976387579227,
+      "std_latency": 1.4573809706395253
+    }
+  },
+  "shifting": {
+    "rl_agent": {
+      "mean_latency": 11.717357039867398,
+      "std_latency": 0.12422824381611558
+    },
+    "static": {
+      "mean_latency": 11.718592092255996,
+      "std_latency": 0.1035757761075005
+    }
+  },
+  "bimodal": {
+    "rl_agent": {
+      "mean_latency": 10.981868164038627,
+      "std_latency": 0.0951431877528166
+    },
+    "static": {
+      "mean_latency": 11.01194251612269,
+      "std_latency": 0.08268834455335114
+    }
+  }
+}
